@@ -3,6 +3,8 @@
  */
 import type { Ticket } from "@/lib/types";
 
+export const TICKETS_CSV_BOM = "\uFEFF";
+
 const COLUMNS: Array<keyof Pick<
   Ticket,
   "id" | "title" | "deviceType" | "dorm" | "status" | "priority" | "createdAt" | "repairNote"
@@ -34,7 +36,7 @@ export function exportTicketsCsv(tickets: Ticket[]): void {
   if (typeof window === "undefined") return;
 
   const csv = buildTicketsCsv(tickets);
-  const blob = new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8;" });
+  const blob = new Blob([`${TICKETS_CSV_BOM}${csv}`], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   const stamp = new Date().toISOString().slice(0, 10);
@@ -45,3 +47,4 @@ export function exportTicketsCsv(tickets: Ticket[]): void {
   link.remove();
   URL.revokeObjectURL(url);
 }
+
