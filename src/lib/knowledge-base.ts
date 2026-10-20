@@ -82,7 +82,7 @@ export function retrieveKnowledge(description: string, limit = 2): KnowledgeMatc
   if (!query) return [];
 
   return KNOWLEDGE_BASE.map((entry) => toKnowledgeMatch(entry, query))
-    .filter((item) => item.score >= 3)
+    .filter((item) => item.score >= 8)
     .sort((a, b) => b.score - a.score)
     .slice(0, limit);
 }
@@ -124,3 +124,4 @@ ${context}
 }
 
 export const KNOWLEDGE_BASE_SIZE = KNOWLEDGE_BASE.length;
+
