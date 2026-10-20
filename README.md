@@ -177,14 +177,15 @@ node --check public/sw.js
 - 语音、视频生成依赖浏览器能力，Chrome/Edge 支持最佳。
 - 生成视频为 WebM，赛事提交仍需单独录制 5–8 分钟 MP4。
 
-## 创建 Public 仓库并推送
+## 仓库与发布
 
-```bash
-git remote add origin https://github.com/<your-account>/<your-repo>.git
-git push -u origin main
-```
+- GitHub 公开仓库：https://github.com/rzdx-lyh/campus-computer-care
+- Release v1.0.0：https://github.com/rzdx-lyh/campus-computer-care/releases/tag/v1.0.0
+- 技术文档 PDF：`docs/技术文档.pdf`（20 页）
+- 设计说明书：`docs/程序设计.md`
+- 演示视频脚本 / 答辩 Q&A / 提交清单：`docs/`
 
-推送前确认仓库为 Public，并执行：
+提交前执行 Key 自查：
 
 ```bash
 git grep -n -E "s[k]-[A-Za-z0-9_-]{20,}"
