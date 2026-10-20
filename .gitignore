@@ -1,0 +1,11 @@
+﻿# 用途：排除 Next.js 项目依赖、构建产物与本地日志。
+node_modules
+.next
+out
+.env*
+!.env.example
+npm-debug.log*
+*.tsbuildinfo
+.vercel
+coverage
+

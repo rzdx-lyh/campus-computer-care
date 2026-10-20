@@ -1,0 +1,63 @@
+﻿/**
+ * 用途：定义全局 Tailwind 基础样式、背景氛围和复用界面类。
+ */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  background:
+    radial-gradient(circle at 10% 0%, rgba(219, 238, 254, 0.9), transparent 28rem),
+    radial-gradient(circle at 92% 18%, rgba(224, 242, 254, 0.7), transparent 24rem),
+    #f8fafc;
+  color: #0f172a;
+  font-family:
+    "SF Pro Display", "PingFang SC", "Microsoft YaHei", "Segoe UI", system-ui,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: #bfe1fe;
+  color: #1e458a;
+}
+
+@layer components {
+  .surface-card {
+    @apply rounded-2xl border border-slate-200/80 bg-white shadow-soft;
+  }
+
+  .field-label {
+    @apply mb-2 block text-sm font-semibold text-slate-700;
+  }
+
+  .field-input {
+    @apply w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-campus-400 focus:ring-4 focus:ring-campus-100;
+  }
+
+  .primary-button {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-campus-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-campus-200 transition hover:-translate-y-0.5 hover:bg-campus-700 focus:outline-none focus:ring-4 focus:ring-campus-200;
+  }
+
+  .secondary-button {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:-translate-y-0.5 hover:border-campus-200 hover:text-campus-700 focus:outline-none focus:ring-4 focus:ring-campus-100;
+  }
+
+  .ghost-button {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-campus-700 transition hover:bg-campus-50 focus:outline-none focus:ring-4 focus:ring-campus-100;
+  }
+}
