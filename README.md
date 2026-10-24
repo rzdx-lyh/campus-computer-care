@@ -46,7 +46,7 @@
 | --- | ---: | --- | --- |
 | AI 技术深度 | 35% | DeepSeek 多轮问诊、角色 Prompt、JSON 结构化输出、本地 RAG、可选 Search + Fetch、失败降级 | `src/app/api/diagnose/route.ts`、`src/lib/knowledge-base.ts`、`src/lib/rag-vector-store.ts`、`src/lib/deepseek-search.ts` |
 | 创新性 | 25% | 从诊断直接生成工单、学习模式步骤卡、错误码上下文、证据链、AI 维修摘要、管理洞察、账号鉴权、本地向量资料库 | `src/app/diagnosis/page.tsx`、`src/lib/error-code.ts`、`src/app/api/repair-advice/route.ts`、`src/app/api/insight/route.ts`、`src/lib/local-vector-db.ts`、`src/lib/auth-store.ts` |
-| 前端工程质量 | 10% | Next.js 15 + TypeScript + Tailwind、分层目录、类型检查、8 条核心测试、GitHub Actions CI、PWA | `src/lib`、`tests/core.test.ts`、`.github/workflows/ci.yml` |
+| 前端工程质量 | 10% | Next.js 15 + TypeScript + Tailwind、分层目录、类型检查、18 条测试、GitHub Actions CI、PWA | `src/lib`、`tests/core.test.ts`、`.github/workflows/ci.yml` |
 | 实用性 | 10% | 面向宿舍报修，覆盖体检、问诊、报修、维修、评价和管理统计 | `src/app` 全部页面与 `src/lib/storage.ts` |
 | 用户体验 | 10% | 响应式 UI、流式响应、离线提示、证据卡、语音、报告、操作示意图、14 秒演示视频 | `src/components`、`src/app/diagnosis/page.tsx` |
 | 社会价值与商业潜力 | 10% | 降低误操作和沟通成本，可复制到其他院校，具备知识库运营与运维数据服务潜力 | 知识库、管理看板、本地部署方案 |
@@ -213,7 +213,7 @@ node --check public/sw.js
 
 - GitHub 公开仓库：https://github.com/rzdx-lyh/campus-computer-care
 - Release v1.0.0：https://github.com/rzdx-lyh/campus-computer-care/releases/tag/v1.0.0
-- 技术文档 PDF：`docs/技术文档.pdf`（20 页）
+- 技术文档 PDF：`docs/技术文档.pdf`（22 页）
 - 演示视频脚本 / 答辩 Q&A：`docs/`
 
 提交前执行 Key 自查：
@@ -227,5 +227,6 @@ git grep -n -E "s[k]-[A-Za-z0-9_-]{20,}"
 ## License
 
 本项目代码采用 MIT License，见根目录 `LICENSE`。`knowledge-base/` 目录保留其原有 MIT License。
+
 
 
