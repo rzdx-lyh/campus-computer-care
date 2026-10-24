@@ -1,6 +1,3 @@
-﻿/**
- * 用途：提供首次打开系统时展示的校园维修演示工单。
- */
 import type { Ticket } from "@/lib/types";
 
 export const DEMO_TICKETS: Ticket[] = [

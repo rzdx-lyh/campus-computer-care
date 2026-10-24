@@ -1,6 +1,3 @@
-/**
- * 用途：在诊断页与工单页之间传递 AI 诊断草稿，实现一键预填报修信息。
- */
 import type { DiagnosisResult, TicketPriority } from "@/lib/types";
 
 const DIAGNOSIS_DRAFT_KEY = "campus-computer-care:diagnosis-draft";
@@ -29,6 +26,7 @@ function mapPriority(riskLevel: DiagnosisResult["riskLevel"]): TicketPriority {
 export function createDiagnosisTicketDraft(
   result: DiagnosisResult,
   originalDescription: string,
+  options?: { conversation?: string },
 ): DiagnosisTicketDraft {
   const sourceNames = (result.sources ?? []).map((source) => source.faultType);
   const titleBase = result.summary.replace(/[。！？!?].*$/, "").trim();
@@ -44,6 +42,9 @@ export function createDiagnosisTicketDraft(
       ? `建议排查步骤：\n${result.suggestedActions.map((item) => `- ${item}`).join("\n")}`
       : "",
     sourceNames.length > 0 ? `知识库参考：${sourceNames.join("、")}` : "",
+    options?.conversation?.trim()
+      ? `问诊记录（含多轮追问，供维修员参考）：\n${options.conversation.trim()}`
+      : "",
     "以上内容由 AI 初步诊断生成，仅供维修参考。",
   ].filter(Boolean);
 

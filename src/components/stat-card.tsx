@@ -1,6 +1,3 @@
-﻿/**
- * 用途：仪表盘统计卡片，用于管理员看板与工作台概览。
- */
 import { Icon, type IconName } from "@/components/icon";
 
 interface StatCardProps {
@@ -12,20 +9,20 @@ interface StatCardProps {
 }
 
 const TONES = {
-  blue: "bg-campus-50 text-campus-600",
-  amber: "bg-amber-50 text-amber-600",
-  green: "bg-emerald-50 text-emerald-600",
-  slate: "bg-slate-100 text-slate-600",
+  blue: "bg-blue-400/15 text-blue-300",
+  amber: "bg-amber-400/15 text-amber-300",
+  green: "bg-emerald-400/15 text-emerald-300",
+  slate: "bg-white/10 text-slate-300",
 };
 
 export function StatCard({ label, value, note, icon, tone = "blue" }: StatCardProps) {
   return (
-    <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-soft">
+    <div className="rounded-2xl border border-white/10 bg-white/[0.055] p-5 shadow-soft backdrop-blur-xl transition duration-300 hover:border-white/20">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-sm font-medium text-slate-500">{label}</p>
-          <p className="mt-3 text-3xl font-bold tracking-tight text-slate-900">{value}</p>
-          <p className="mt-1 text-xs text-slate-400">{note}</p>
+          <p className="text-sm font-medium text-slate-400">{label}</p>
+          <p className="mt-3 text-3xl font-bold tracking-tight text-slate-100">{value}</p>
+          <p className="mt-1 text-xs text-slate-500">{note}</p>
         </div>
         <span className={`grid size-10 place-items-center rounded-xl ${TONES[tone]}`}>
           <Icon name={icon} className="size-5" />

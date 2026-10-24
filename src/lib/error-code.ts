@@ -1,6 +1,3 @@
-﻿/**
- * 用途：从故障知识库现象关键词生成错误码映射，并在用户输入中识别蓝屏/启动错误码。
- */
 import rawKnowledgeBase from "../../knowledge-base/data/knowledge_base.json";
 
 interface KnowledgeEntry {

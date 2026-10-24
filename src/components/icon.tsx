@@ -1,6 +1,3 @@
-﻿/**
- * 用途：提供项目内统一的手写 SVG 图标，避免额外引入图标依赖。
- */
 import type { SVGProps } from "react";
 
 export type IconName =
@@ -29,7 +26,13 @@ export type IconName =
   | "mic"
   | "volume"
   | "download"
-  | "graph";
+  | "graph"
+  | "lock"
+  | "book"
+  | "video"
+  | "logout"
+  | "database"
+  | "cloud-upload";
 
 export function Icon({
   name,
@@ -129,6 +132,43 @@ export function Icon({
         <circle cx="5" cy="18" r="2.5" />
         <circle cx="19" cy="18" r="2.5" />
         <path d="m10.5 7-4 8.5M13.5 7l4 8.5M7.5 18h9" />
+      </>
+    ),
+    lock: (
+      <>
+        <rect x="4" y="10" width="16" height="11" rx="2" />
+        <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+      </>
+    ),
+    book: (
+      <>
+        <path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z" />
+        <path d="M4 19a2 2 0 0 1 2-2h13v5H6a2 2 0 0 1-2-2z" />
+        <path d="M9 7h7" />
+      </>
+    ),
+    video: (
+      <>
+        <rect x="3" y="6" width="13" height="12" rx="2" />
+        <path d="m16 10 5-3v10l-5-3z" />
+      </>
+    ),
+    logout: (
+      <>
+        <path d="M9 21H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3" />
+        <path d="m16 17 5-5-5-5M21 12H9" />
+      </>
+    ),
+    database: (
+      <>
+        <ellipse cx="12" cy="6" rx="8" ry="3" />
+        <path d="M4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6" />
+      </>
+    ),
+    "cloud-upload": (
+      <>
+        <path d="M17 18a4 4 0 0 0 1.2-7.8A6 6 0 0 0 6.6 9.6 3.5 3.5 0 0 0 7 18z" />
+        <path d="M12 12v6m-2.5-2.5L12 16l2.5-2.5" />
       </>
     ),
   };

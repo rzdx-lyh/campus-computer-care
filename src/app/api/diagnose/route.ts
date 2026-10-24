@@ -1,7 +1,3 @@
-/**
- * 用途：AI 诊断后端路由，支持多轮问诊、RAG 证据返回和 DeepSeek 流式诊断。
- * 协议：delta 发送可读诊断文本，result 发送结构化结果、追问和知识库来源。
- */
 import OpenAI from 'openai';
 import type { NextRequest } from 'next/server';
 import type { ChatCompletionCreateParamsStreaming } from 'openai/resources/chat/completions';
@@ -25,7 +21,7 @@ import type { ConversationTurn, DiagnosisSource } from '@/lib/types';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-const MODEL = 'deepseek-flash';
+const MODEL = process.env.DEEPSEEK_MODEL || 'deepseek-flash';
 const BASE_URL = process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com';
 
 const SYSTEM_PROMPT = `

@@ -1,6 +1,3 @@
-/**
- * 用途：封装 DeepSeek 官方 Search 与 Fetch API，先搜索网页，再抓取高质量页面正文。
- */
 const BASE_URL = (process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com').replace(/\/+$/, '');
 const API_BASE = BASE_URL.endsWith('/v1') ? BASE_URL : `${BASE_URL}/v1`;
 

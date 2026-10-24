@@ -1,12 +1,38 @@
-﻿/**
- * 用途：定义全局 Tailwind 基础样式、背景氛围和复用界面类。
- */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================================
+   统一设计令牌（内部 UI 模块使用，背景相关样式不在此处定义）
+   ============================================================ */
 :root {
-  color-scheme: light;
+  color-scheme: dark;
+
+  /* 面板：深紫夜色（Solana 仪表盘风） */
+  --ui-card: rgba(30, 26, 51, 0.88);
+  --ui-panel: rgba(38, 33, 64, 0.92);
+  --ui-panel-soft: rgba(50, 44, 82, 0.72);
+  --ui-inset: rgba(18, 15, 33, 0.6);
+
+  /* 强调色：紫罗兰主色 + 薄荷绿辅助 */
+  --ui-accent: #7c6cff;
+  --ui-accent-2: #3ddc97;
+  --ui-accent-weak: rgba(124, 108, 255, 0.15);
+  --ui-accent-2-weak: rgba(61, 220, 151, 0.13);
+
+  /* 文字 */
+  --ui-text: #f2f1fa;
+  --ui-text-dim: #a8a3c7;
+
+  /* 边框 */
+  --ui-border: rgba(167, 160, 220, 0.20);
+  --ui-border-soft: rgba(167, 160, 220, 0.13);
+
+  /* 圆角 / 阴影 */
+  --ui-radius-card: 18px;
+  --ui-radius-panel: 16px;
+  --ui-radius-control: 12px;
+  --ui-shadow-card: 0 10px 30px -18px rgba(0, 0, 0, 0.75), 0 2px 8px -4px rgba(0, 0, 0, 0.5);
 }
 
 * {
@@ -21,43 +47,372 @@ body {
   min-height: 100vh;
   margin: 0;
   background:
-    radial-gradient(circle at 10% 0%, rgba(219, 238, 254, 0.9), transparent 28rem),
-    radial-gradient(circle at 92% 18%, rgba(224, 242, 254, 0.7), transparent 24rem),
-    #f8fafc;
-  color: #0f172a;
+    radial-gradient(1200px 1200px at -8% 105%, rgba(96, 165, 250, 0.14), transparent 55%),
+    radial-gradient(900px 900px at 110% -10%, rgba(94, 234, 212, 0.07), transparent 55%),
+    radial-gradient(700px 500px at 85% 60%, rgba(139, 76, 238, 0.05), transparent 60%),
+    #0a0e1a;
+  color: #dfe7f3;
   font-family:
-    "SF Pro Display", "PingFang SC", "Microsoft YaHei", "Segoe UI", system-ui,
+    "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", "Segoe UI", system-ui,
     sans-serif;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  line-height: 1.65;
 }
 
 ::selection {
-  background: #bfe1fe;
-  color: #1e458a;
+  background: rgba(124, 108, 255, 0.32);
+  color: #f5f3ff;
+}
+
+/* ---- 全局滚动条：纤细深色，与主题融合 ---- */
+::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(167, 160, 220, 0.2);
+  border-radius: 99px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(124, 108, 255, 0.42);
+  background-clip: content-box;
+}
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(167, 160, 220, 0.28) transparent;
+}
+
+img,
+svg,
+video {
+  max-width: 100%;
+}
+
+h1, h2, h3 {
+  letter-spacing: -0.01em;
+}
+
+/* 数字等宽，数据展示更整齐 */
+.tabular, table {
+  font-variant-numeric: tabular-nums;
+}
+
+/* 键盘可达性：统一柔和的聚焦光环 */
+:focus-visible {
+  outline: 2px solid rgba(124, 108, 255, 0.65);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+/* 吉祥物待机/思考时的轻微浮动 */
+@keyframes mascotBob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+/* 对话气泡呼吸光晕：柔和的紫色辉光缓慢起伏 */
+@keyframes bubbleBreathe {
+  0%, 100% {
+    box-shadow: 0 8px 20px -14px rgba(0, 0, 0, 0.8), 0 0 0 rgba(124, 108, 255, 0);
+    border-color: rgba(148, 163, 184, 0.22);
+  }
+  50% {
+    box-shadow: 0 8px 24px -14px rgba(0, 0, 0, 0.8), 0 0 26px -6px rgba(124, 108, 255, 0.35);
+    border-color: rgba(124, 108, 255, 0.45);
+  }
+}
+
+.bubble-breathe {
+  animation: bubbleBreathe 4.5s ease-in-out infinite;
+}
+
+/* 对话窗口容器的环境呼吸：更缓慢的紫色氛围光 */
+@keyframes chatAmbientBreathe {
+  0%, 100% { box-shadow: var(--ui-shadow-card); }
+  50% { box-shadow: var(--ui-shadow-card), 0 0 60px -24px rgba(124, 108, 255, 0.4); }
+}
+
+.chat-ambient {
+  animation: chatAmbientBreathe 7s ease-in-out infinite;
+}
+
+/* 对话区背景：苹果风渐变色（蓝→紫→粉，适配深色主题的柔光版） */
+.chat-gradient-bg {
+  background:
+    radial-gradient(560px 380px at 12% 6%, rgba(59, 130, 246, 0.20), transparent 62%),
+    radial-gradient(640px 420px at 88% 30%, rgba(168, 85, 247, 0.18), transparent 62%),
+    radial-gradient(620px 420px at 45% 98%, rgba(244, 63, 94, 0.14), transparent 60%),
+    linear-gradient(160deg, rgba(30, 26, 51, 0.4), rgba(18, 15, 33, 0.6));
 }
 
 @layer components {
+  .mascot-bob {
+    animation: mascotBob 1.8s ease-in-out infinite;
+    transform-origin: center;
+  }
+
+  /* ---- 统一卡片：深蓝灰半透明 + 细边框 + 柔和阴影 ---- */
   .surface-card {
-    @apply rounded-2xl border border-slate-200/80 bg-white shadow-soft;
+    background: var(--ui-card);
+    border: 1px solid var(--ui-border);
+    border-radius: var(--ui-radius-card);
+    box-shadow: var(--ui-shadow-card);
+    backdrop-filter: blur(10px);
+    transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+  }
+  .surface-card:hover {
+    border-color: rgba(124, 108, 255, 0.28);
+  }
+
+  /* 次级面板 */
+  .ui-panel {
+    background: var(--ui-panel);
+    border: 1px solid var(--ui-border-soft);
+    border-radius: var(--ui-radius-panel);
+  }
+
+  .kicker {
+    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold tracking-wide;
+    background: var(--ui-accent-weak);
+    border: 1px solid rgba(124, 108, 255, 0.3);
+    color: #a89bff;
   }
 
   .field-label {
-    @apply mb-2 block text-sm font-semibold text-slate-700;
+    @apply mb-2 block text-sm font-semibold;
+    color: var(--ui-text);
   }
 
   .field-input {
-    @apply w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-campus-400 focus:ring-4 focus:ring-campus-100;
+    @apply w-full px-4 py-3 text-sm outline-none transition duration-200;
+    background: var(--ui-inset);
+    border: 1px solid var(--ui-border);
+    border-radius: var(--ui-radius-control);
+    color: var(--ui-text);
+  }
+  .field-input::placeholder { color: #6f6a8f; }
+  .field-input:hover { border-color: rgba(167, 160, 220, 0.34); }
+  .field-input:focus {
+    border-color: var(--ui-accent);
+    box-shadow: 0 0 0 3px rgba(124, 108, 255, 0.18);
+    background: rgba(18, 15, 33, 0.75);
   }
 
   .primary-button {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-campus-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-campus-200 transition hover:-translate-y-0.5 hover:bg-campus-700 focus:outline-none focus:ring-4 focus:ring-campus-200;
+    @apply inline-flex items-center justify-center gap-2 px-5 py-3 text-sm font-bold transition duration-200;
+    background: linear-gradient(135deg, #8b7cff, #6c5ce7 60%, #5b4bd6);
+    border: none;
+    border-radius: var(--ui-radius-control);
+    color: #ffffff;
+    box-shadow: 0 8px 22px -12px rgba(124, 108, 255, 0.7);
   }
+  .primary-button:hover { transform: translateY(-1px); box-shadow: 0 12px 26px -12px rgba(124, 108, 255, 0.85); }
 
   .secondary-button {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:-translate-y-0.5 hover:border-campus-200 hover:text-campus-700 focus:outline-none focus:ring-4 focus:ring-campus-100;
+    @apply inline-flex items-center justify-center gap-2 px-5 py-3 text-sm font-bold transition duration-200;
+    background: var(--ui-panel);
+    border: 1px solid var(--ui-border);
+    border-radius: var(--ui-radius-control);
+    color: var(--ui-text);
+  }
+  .secondary-button:hover {
+    border-color: rgba(124, 108, 255, 0.45);
+    color: #a89bff;
+    transform: translateY(-1px);
   }
 
   .ghost-button {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-campus-700 transition hover:bg-campus-50 focus:outline-none focus:ring-4 focus:ring-campus-100;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm font-bold transition duration-200;
+    color: #a89bff;
   }
+  .ghost-button:hover { background: var(--ui-accent-weak); }
+
+  /* 深空主题文字工具类 */
+  .text-ink { color: var(--ui-text); }
+  .text-ink-dim { color: var(--ui-text-dim); }
+
+  /* 苹果风渐变文字：蓝 → 紫 → 粉红 */
+  .gradient-text {
+    background: linear-gradient(92deg, #3b82f6 8%, #7c6cff 38%, #a855f7 62%, #f43f5e 92%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+}
+
+/* ============================================================
+   内部 UI 统一层
+   作用域限定为 main 内容区，绝不触碰 body / 背景层 / 粒子画布
+   ============================================================ */
+
+/* ---------- 1. 圆角统一（16–22px 卡片 / 10–14px 控件） ---------- */
+main .rounded-lg { border-radius: 12px; }
+main .rounded-xl { border-radius: 14px; }
+main .rounded-2xl { border-radius: 18px; }
+main .rounded-3xl { border-radius: 22px; }
+main .rounded-\[2rem\] { border-radius: 22px; }
+
+/* ---------- 2. 文字层级 ---------- */
+main .text-slate-900,
+main .text-slate-800,
+main .text-slate-700 { color: var(--ui-text) !important; }
+main .text-slate-600 { color: #cfcbe8 !important; }
+main .text-slate-500,
+main .text-slate-400,
+main .text-slate-300 { color: var(--ui-text-dim) !important; }
+
+/* 强调色文字统一为青绿，保留状态语义色 */
+main .text-campus-600,
+main .text-campus-700,
+main .text-campus-800,
+main .text-campus-900,
+main .text-sky-600,
+main .text-sky-700,
+main .text-teal-600,
+main .text-teal-700,
+main .text-emerald-600,
+main .text-emerald-700 { color: var(--ui-accent) !important; }
+main .text-amber-800,
+main .text-amber-700 { color: #fbbf24 !important; }
+main .text-rose-700,
+main .text-red-700,
+main .text-red-600 { color: #fb7185 !important; }
+main .text-emerald-500,
+main .text-green-600 { color: #34d399 !important; }
+
+/* ---------- 3. 面板与容器背景 ---------- */
+main .bg-white { background-color: var(--ui-card) !important; }
+main .bg-slate-50,
+main .bg-slate-100,
+main .bg-slate-200,
+main .bg-slate-50\/70,
+main .bg-slate-200\/60 { background-color: var(--ui-panel) !important; }
+main .bg-campus-50,
+main .bg-campus-50\/60,
+main .bg-campus-50\/70,
+main .bg-sky-50,
+main .bg-sky-100,
+main .bg-blue-50 { background-color: var(--ui-accent-2-weak) !important; }
+main .bg-emerald-50,
+main .bg-emerald-100,
+main .bg-green-50 { background-color: rgba(52, 211, 153, 0.14) !important; }
+main .bg-amber-50,
+main .bg-amber-100,
+main .bg-yellow-50 { background-color: rgba(251, 191, 36, 0.14) !important; }
+main .bg-red-50,
+main .bg-red-100,
+main .bg-rose-50 { background-color: rgba(248, 113, 113, 0.14) !important; }
+main .bg-violet-50,
+main .bg-violet-100,
+main .bg-purple-50 { background-color: rgba(167, 139, 250, 0.14) !important; }
+
+/* ---------- 4. 边框 ---------- */
+main .border-slate-100,
+main .border-slate-200,
+main .border-slate-300,
+main .border-campus-100,
+main .border-campus-200,
+main .border-sky-100,
+main .border-amber-100,
+main .border-amber-200,
+main .border-emerald-100,
+main .border-emerald-200 { border-color: var(--ui-border) !important; }
+
+/* ---------- 5. 主按钮：青绿渐变 ---------- */
+main .bg-campus-600,
+main .bg-campus-700,
+main .bg-sky-600,
+main .bg-teal-600,
+main .bg-emerald-600 {
+  background-image: linear-gradient(135deg, #8b7cff, #6c5ce7 60%, #5b4bd6) !important;
+  background-color: transparent !important;
+  color: #ffffff !important;
+  border-color: transparent !important;
+  box-shadow: 0 8px 22px -12px rgba(124, 108, 255, 0.65);
+}
+main .bg-campus-600:hover,
+main .bg-campus-700:hover { transform: translateY(-1px); }
+
+/* ---------- 6. 输入框 / 下拉 / 文本域 ---------- */
+main input,
+main select,
+main textarea {
+  background-color: var(--ui-inset);
+  border: 1px solid var(--ui-border);
+  border-radius: var(--ui-radius-control);
+  color: var(--ui-text);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+main input::placeholder,
+main textarea::placeholder { color: #6f6a8f; }
+main input:focus,
+main select:focus,
+main textarea:focus {
+  border-color: var(--ui-accent);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(69, 230, 196, 0.15);
+}
+main select option { background: #221d3f; color: var(--ui-text); }
+
+/* ---------- 7. 表格 ---------- */
+main table { border-color: var(--ui-border) !important; width: 100%; }
+main thead,
+main thead tr { background: rgba(38, 33, 64, 0.9) !important; }
+main th {
+  color: #cfcbe8 !important;
+  border-color: var(--ui-border) !important;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  padding: 10px 14px !important;
+}
+main td {
+  border-color: var(--ui-border-soft) !important;
+  padding: 12px 14px !important;
+  color: var(--ui-text-dim);
+}
+main tbody tr:hover { background: rgba(124, 108, 255, 0.2) !important; }
+/* 表格横向滚动，防止小屏溢出 */
+main table { display: table; }
+main .overflow-x-auto { max-width: 100%; }
+
+/* ---------- 8. 分隔线 / 进度条底槽 ---------- */
+main hr { border-color: var(--ui-border) !important; }
+main .bg-slate-200.rounded-full,
+main .bg-slate-100.rounded-full,
+main .bg-white\/20 { background-color: rgba(148, 163, 184, 0.18) !important; }
+
+/* ---------- 9. 通用悬停过渡 ---------- */
+main a,
+main button { transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease; }
+
+/* 浅色 hover 背景接管：悬停统一为淡紫高亮，杜绝突兀的浅灰白闪块 */
+main .hover\:bg-slate-50\/60:hover,
+main .hover\:bg-slate-50\/70:hover,
+main .hover\:bg-slate-50:hover,
+main .hover\:bg-slate-100:hover,
+main .hover\:bg-slate-200:hover,
+main .hover\:bg-white:hover,
+main .hover\:bg-campus-50\/50:hover,
+main .hover\:bg-campus-50:hover,
+main .hover\:bg-campus-100:hover {
+  background-color: rgba(124, 108, 255, 0.22) !important;
+  box-shadow: inset 0 0 0 1px rgba(124, 108, 255, 0.28);
+}
+
+/* ---------- 10. 响应式：小屏防溢出 ---------- */
+@media (max-width: 640px) {
+  main { padding-left: 14px; padding-right: 14px; }
+  main .grid { gap: 14px !important; }
+  main h1 { font-size: 22px !important; }
+  main h2 { font-size: 18px !important; }
+  main table { font-size: 12px; }
+  main th, main td { padding: 8px 10px !important; }
+  main .overflow-x-auto { -webkit-overflow-scrolling: touch; }
 }

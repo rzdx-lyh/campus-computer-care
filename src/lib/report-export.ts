@@ -1,6 +1,3 @@
-/**
- * 用途：把一次 AI 诊断导出为 Markdown 报告，并触发浏览器下载。
- */
 import type { DiagnosisResult } from "@/lib/types";
 
 const RISK_LABELS: Record<DiagnosisResult["riskLevel"], string> = {

@@ -1,11 +1,10 @@
-﻿/**
- * 用途：AI 诊断聊天页，支持多轮问诊、RAG 证据展示、流式回复和一键生成工单草稿。
- */
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { Icon } from "@/components/icon";
+import { MascotAssistant } from "@/components/mascot-assistant";
 import { PageHeader } from "@/components/page-header";
 import { OperationDiagram } from "@/components/operation-diagram";
 import { DemoVideoRecorder } from "@/components/demo-video-recorder";
@@ -289,25 +288,24 @@ function DiagnosisResultCard({
       ) : null}
       <OperationDiagram result={result} />
 
-      <div className="mt-5 grid gap-2 sm:grid-cols-2">
+      <button
+        type="button"
+        onClick={() => onCreateTicket(result, sourceDescription)}
+        className="primary-button mt-5 flex w-full items-center justify-center gap-2 py-3 text-sm font-medium"
+      >
+        <Icon name="plus" className="size-4" />
+        一键转工单：用 AI 诊断结果预填报修单
+        <Icon name="arrow-right" className="size-4" />
+      </button>
+      <p className="mt-1 text-center text-[11px] leading-4 text-slate-400">
+        标题、设备类型、故障描述、优先级已自动填好，并附带完整问诊记录；跳转后只需补宿舍与预约时间
+      </p>
+
+      <div className="mt-3 grid gap-2 sm:grid-cols-3">
         <DemoVideoRecorder
           result={result}
           className="secondary-button w-full py-2.5"
         />
-        <button
-          type="button"
-          onClick={() => onCreateTicket(result, sourceDescription)}
-          className={`w-full py-2.5 ${
-            result.needRepair ? "primary-button" : "secondary-button"
-          }`}
-        >
-          <Icon name="plus" className="size-4" />
-          {result.needRepair ? "用诊断结果创建维修工单" : "生成报修草稿"}
-          <Icon name="arrow-right" className="size-4" />
-        </button>
-      </div>
-
-      <div className="mt-2 grid gap-2 sm:grid-cols-2">
         <button
           type="button"
           onClick={() =>
@@ -340,7 +338,45 @@ function DiagnosisResultCard({
   );
 }
 
+/**
+ * AI 辅助诊断页仅对学生开放：
+ * 维修员/管理员入口的独立诊断页已按需求移除，AI 诊断收敛到工单页面，
+ * 这里对两类内部角色展示迁移提示。
+ */
 export default function DiagnosisPage() {
+  const { role, roleLabel } = useRole();
+
+  if (role !== "student") {
+    return (
+      <div className="surface-card mx-auto max-w-xl p-8 text-center">
+        <span className="mx-auto grid size-12 place-items-center rounded-2xl bg-campus-50 text-campus-600">
+          <Icon name="sparkles" className="size-6" />
+        </span>
+        <h1 className="mt-4 text-lg font-bold text-slate-800">AI 辅助诊断已调整到工单页面</h1>
+        <p className="mt-2 text-sm leading-6 text-slate-500">
+          {roleLabel}视角不再保留独立诊断页。请前往工单列表，在具体工单上点击「工单 AI
+          辅助诊断」使用 AI 能力；维修员还可使用维修建议与特供资料库。
+        </p>
+        <div className="mt-6 flex flex-wrap justify-center gap-3">
+          <Link href="/tickets" className="primary-button py-2.5">
+            <Icon name="clipboard" className="size-4" />
+            前往工单页面
+          </Link>
+          {role === "technician" ? (
+            <Link href="/technician/library" className="secondary-button py-2.5">
+              <Icon name="book" className="size-4" />
+              特供资料库
+            </Link>
+          ) : null}
+        </div>
+      </div>
+    );
+  }
+
+  return <DiagnosisWorkspace />;
+}
+
+function DiagnosisWorkspace() {
   const router = useRouter();
   const { role, roleLabel } = useRole();
   const isOnline = useOnlineStatus();
@@ -365,6 +401,36 @@ export default function DiagnosisPage() {
   useEffect(() => {
     scrollAnchorRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, [messages]);
+
+  // ---- 数字人：状态与文案全部由 AI 的真实输出推导 ----
+  const lastResult = useMemo(
+    () => [...messages].reverse().find((message) => message.result)?.result ?? null,
+    [messages],
+  );
+
+  const assistantState = isStreaming
+    ? "thinking"
+    : lastResult
+      ? lastResult.riskLevel === "high" || lastResult.needRepair
+        ? "warning"
+        : "success"
+      : "idle";
+
+  const assistantMessage = useMemo(() => {
+    if (isStreaming) return "正在结合 25 条本地故障知识分析，稍等一下～";
+    if (!lastResult) return "描述一下电脑哪里不舒服，我跟着 AI 一起看～";
+    const summary = lastResult.summary.length > 34 ? `${lastResult.summary.slice(0, 34)}…` : lastResult.summary;
+    return assistantState === "warning" ? `风险偏高：${summary}` : `已定位：${summary}`;
+  }, [isStreaming, lastResult, assistantState]);
+
+  /** 可朗读内容：优先读 AI 的诊断结论，其次读最近一条 AI 回复 */
+  const speakText = useMemo(() => {
+    if (lastResult) {
+      return [lastResult.summary, ...lastResult.suggestedActions.slice(0, 2)].join("。");
+    }
+    const lastAssistant = [...messages].reverse().find((message) => message.role === "assistant");
+    return lastAssistant?.content?.trim() ?? "";
+  }, [lastResult, messages]);
 
   const submitMessage = async (rawContent: string) => {
     const content = rawContent.trim();
@@ -487,7 +553,16 @@ export default function DiagnosisPage() {
     window.setTimeout(() => inputRef.current?.focus(), 0);
   };
   const handleCreateTicket = (result: DiagnosisResult, sourceDescription: string) => {
-    const draft = createDiagnosisTicketDraft(result, sourceDescription);
+    const conversation = messages
+      .filter(
+        (message) =>
+          message.id !== "welcome" &&
+          message.content.trim() &&
+          (message.role === "user" || message.role === "assistant"),
+      )
+      .map((message) => `${message.role === "user" ? "学生" : "AI"}：${message.content.trim()}`)
+      .join("\n");
+    const draft = createDiagnosisTicketDraft(result, sourceDescription, { conversation });
     saveDiagnosisTicketDraft(draft);
     router.push("/tickets/new?from=diagnosis");
   };
@@ -527,7 +602,7 @@ export default function DiagnosisPage() {
         </div>
       ) : null}
       <div className="grid gap-5 lg:grid-cols-[1fr_19rem]">
-        <section className="surface-card flex min-h-[620px] flex-col overflow-hidden">
+        <section className="surface-card chat-ambient flex min-h-[620px] flex-col overflow-hidden">
           <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4 sm:px-6">
             <div className="flex items-center gap-3">
               <span className="grid size-9 place-items-center rounded-xl bg-gradient-to-br from-campus-500 to-campus-700 text-white">
@@ -550,7 +625,7 @@ export default function DiagnosisPage() {
             </button>
           </div>
 
-          <div className="flex-1 space-y-5 overflow-y-auto bg-slate-50/40 p-4 sm:p-6">
+          <div className="chat-gradient-bg flex-1 space-y-5 overflow-y-auto p-4 sm:p-6">
             {streamError ? (
               <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs leading-5 text-amber-800">
                 <p className="font-bold">AI 服务降级</p>
@@ -568,8 +643,8 @@ export default function DiagnosisPage() {
                 <span
                   className={`grid size-8 shrink-0 place-items-center rounded-xl text-xs font-bold ${
                     message.role === "assistant"
-                      ? "bg-campus-600 text-white"
-                      : "bg-slate-200 text-slate-600"
+                      ? "bg-gradient-to-br from-[#8b7cff] to-[#5b4bd6] text-white shadow-[0_0_16px_-4px_rgba(124,108,255,0.7)]"
+                      : "bg-[rgba(124,108,255,0.2)] text-[#93c5fd]"
                   }`}
                 >
                   {message.role === "assistant" ? <Icon name="sparkles" className="size-4" /> : "我"}
@@ -578,8 +653,8 @@ export default function DiagnosisPage() {
                   <div
                     className={`inline-block whitespace-pre-wrap rounded-2xl px-4 py-3 text-left text-sm leading-6 ${
                       message.role === "assistant"
-                        ? "rounded-tl-md border border-slate-200 bg-white text-slate-600 shadow-sm"
-                        : "rounded-tr-md bg-campus-600 text-white shadow-lg shadow-campus-200"
+                        ? "bubble-breathe rounded-tl-md border border-[rgba(148,163,184,0.22)] bg-[rgba(30,39,55,0.94)] text-[#e2e8f0]"
+                        : "rounded-tr-md bg-gradient-to-br from-[#8b7cff] to-[#5b4bd6] text-white shadow-[0_8px_20px_-12px_rgba(124,108,255,0.6)]"
                     }`}
                   >
                     {message.content || (
@@ -634,17 +709,17 @@ export default function DiagnosisPage() {
                   onClick={() => setLearningMode((current) => !current)}
                   className={`flex shrink-0 items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-semibold transition ${
                     learningMode
-                      ? "border-campus-200 bg-campus-50 text-campus-700"
-                      : "border-slate-200 bg-white text-slate-500"
+                      ? "border-[rgba(124,108,255,0.45)] bg-[rgba(124,108,255,0.14)] text-[#7c6cff]"
+                      : "border-[rgba(148,163,184,0.2)] bg-[rgba(30,39,55,0.92)] text-[#9ca9ba]"
                   }`}
                 >
                   <span
                     className={`relative h-5 w-9 rounded-full transition ${
-                      learningMode ? "bg-campus-600" : "bg-slate-300"
+                      learningMode ? "bg-[#7c6cff]" : "bg-[rgba(148,163,184,0.35)]"
                     }`}
                   >
                     <span
-                      className={`absolute top-0.5 size-4 rounded-full bg-white shadow-sm transition-all ${
+                      className={`absolute top-0.5 size-4 rounded-full bg-[#f1f5f9] shadow-sm transition-all ${
                         learningMode ? "left-[18px]" : "left-0.5"
                       }`}
                     />
@@ -715,7 +790,7 @@ export default function DiagnosisPage() {
               <button
                 type="submit"
                 disabled={!input.trim() || isStreaming}
-                className="grid size-12 shrink-0 place-items-center rounded-xl bg-campus-600 text-white shadow-lg shadow-campus-200 transition hover:bg-campus-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
+                className="grid size-12 shrink-0 place-items-center rounded-xl bg-[rgba(124,108,255,0.18)] text-[#93c5fd] shadow-[0_6px_16px_-10px_rgba(124,108,255,0.6)] transition hover:bg-campus-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
                 aria-label="发送消息"
               >
                 <Icon name="arrow-right" className="size-5" />
@@ -736,6 +811,15 @@ export default function DiagnosisPage() {
         </section>
 
         <aside className="space-y-5">
+          <MascotAssistant
+            state={assistantState}
+            speaking={speaking}
+            message={assistantMessage}
+            interactive
+            canSpeak={Boolean(speakText)}
+            onSpeak={() => speak(speakText)}
+          />
+
           <div className="surface-card p-5">
             <div className="flex items-center gap-2">
               <span className="grid size-8 place-items-center rounded-lg bg-campus-50 text-campus-700">

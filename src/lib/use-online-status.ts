@@ -1,6 +1,3 @@
-﻿/**
- * 用途：监听浏览器在线状态，供诊断页和全局离线提示复用。
- */
 "use client";
 
 import { useEffect, useState } from "react";

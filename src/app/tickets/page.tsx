@@ -1,6 +1,3 @@
-﻿/**
- * 用途：工单列表页，支持状态筛选、搜索、详情展示与演示性状态流转。
- */
 "use client";
 
 import Link from "next/link";
@@ -8,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Icon } from "@/components/icon";
 import { PageHeader } from "@/components/page-header";
 import { PriorityLabel, StatusBadge } from "@/components/status-badge";
+import { TicketAiDiagnosis } from "@/components/ticket-ai-diagnosis";
 import { useRole } from "@/lib/role-context";
 import { getEvaluationStats, getNextTicketStatus, getStoredTickets, updateStoredTicket } from "@/lib/storage";
 import type { Ticket, TicketRating, TicketStatus } from "@/lib/types";
@@ -216,8 +214,8 @@ export default function TicketsPage() {
                   onClick={() => setFilter(item.value)}
                   className={`flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold transition ${
                     filter === item.value
-                      ? "bg-white text-campus-700 shadow-sm"
-                      : "text-slate-500 hover:text-slate-800"
+                      ? "bg-[rgba(124,108,255,0.16)] text-[#7c6cff] shadow-[0_6px_16px_-10px_rgba(124,108,255,0.7)]"
+                      : "text-slate-400 hover:text-[#e2e8f0]"
                   }`}
                 >
                   {item.label}
@@ -297,6 +295,7 @@ export default function TicketsPage() {
                           {ticket.repairNote}
                         </div>
                       ) : null}
+                      <TicketAiDiagnosis ticket={ticket} />
                       {ticket.status === "completed" ? (
                         <TicketEvaluationPanel
                           ticket={ticket}

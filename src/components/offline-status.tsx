@@ -1,6 +1,3 @@
-﻿/**
- * 用途：全局显示在线/离线状态，并提示 25 条故障知识可离线查看。
- */
 "use client";
 
 import { useOnlineStatus } from "@/lib/use-online-status";

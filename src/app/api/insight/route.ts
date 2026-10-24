@@ -1,6 +1,3 @@
-/**
- * 用途：根据管理看板统计生成 AI 运维洞察，无 Key 或失败时返回本地模板。
- */
 import OpenAI from "openai";
 import type { NextRequest } from "next/server";
 

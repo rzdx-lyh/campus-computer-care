@@ -1,6 +1,3 @@
-﻿/**
- * 用途：应用根布局，挂载全局样式、角色 Provider、顶部导航与页脚。
- */
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import "@/app/globals.css";
@@ -8,7 +5,9 @@ import { SiteHeader } from "@/components/site-header";
 import { OfflineStatus } from "@/components/offline-status";
 import { PwaRegister } from "@/components/pwa-register";
 import { Icon } from "@/components/icon";
+import { LogoParticles } from "@/components/logo-particles";
 import { RoleProvider } from "@/lib/role-context";
+import { AuthProvider } from "@/lib/auth-context";
 
 export const metadata: Metadata = {
   title: {
@@ -21,35 +20,36 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#2273eb",
+  themeColor: "#0a0e1a",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="zh-CN" data-scroll-behavior="smooth">
       <body>
+        <LogoParticles />
         <RoleProvider>
-          <SiteHeader />
-          <main className="mx-auto min-h-[calc(100vh-10rem)] max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
-            {children}
-          </main>
-          <footer className="border-t border-slate-200/70 bg-white/60">
-            <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-6 text-xs text-slate-400 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
-              <p>© 2026 校园电脑管家 · 让每一次报修更简单</p>
-              <p className="flex items-center gap-1.5">
-                <Icon name="shield" className="size-3.5" />
-                设备信息仅在本机浏览器处理
-              </p>
+          <AuthProvider>
+            <div className="relative z-10">
+              <SiteHeader />
+              <main className="mx-auto min-h-[calc(100vh-10rem)] max-w-7xl px-4 pb-8 pt-8 sm:px-6 sm:pb-10 sm:pt-16 lg:px-8 lg:pt-28 xl:pr-[260px]">
+                {children}
+              </main>
+              <footer className="border-t border-white/10 bg-black/20">
+                <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-6 text-xs text-slate-400 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
+                  <p>© 2026 校园电脑管家 · 校内 IT 服务</p>
+                  <p className="flex items-center gap-1.5">
+                    <Icon name="shield" className="size-3.5" />
+                    设备信息仅在本机浏览器处理
+                  </p>
+                </div>
+              </footer>
+              <OfflineStatus />
+              <PwaRegister />
             </div>
-          </footer>
-          <OfflineStatus />
-          <PwaRegister />
+          </AuthProvider>
         </RoleProvider>
       </body>
     </html>
   );
 }
-
-
-
-

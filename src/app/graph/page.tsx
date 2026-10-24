@@ -1,9 +1,7 @@
-﻿/**
- * 用途：故障知识图谱页，使用纯 SVG 展示故障类型、知识条目、现象和原因节点。
- */
 import Link from "next/link";
 import { Icon } from "@/components/icon";
 import { PageHeader } from "@/components/page-header";
+import { RoleGate } from "@/components/role-gate";
 import rawKnowledgeBase from "../../../knowledge-base/data/knowledge_base.json";
 
 interface KnowledgeEntry {
@@ -111,7 +109,8 @@ export default function GraphPage() {
   });
 
   return (
-    <div>
+    <RoleGate allow={["student"]}>
+      <div>
       <PageHeader
         eyebrow="FAULT KNOWLEDGE GRAPH"
         title="故障知识图谱"
@@ -130,7 +129,7 @@ export default function GraphPage() {
           ["25", "知识条目", "来自 knowledge_base.json"],
           ["50+", "现象与原因节点", "点击即可进入诊断"],
         ].map(([value, label, note]) => (
-          <div key={label} className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+          <div key={label} className="rounded-2xl border border-[rgba(148,163,184,0.2)] bg-[rgba(30,26,51,0.88)] px-4 py-3 shadow-[0_10px_30px_-18px_rgba(0,0,0,0.75)]">
             <div className="flex items-baseline gap-2">
               <span className="text-2xl font-bold text-campus-700">{value}</span>
               <span className="text-xs font-bold text-slate-700">{label}</span>
@@ -154,16 +153,30 @@ export default function GraphPage() {
           </div>
         </div>
 
-        <div className="overflow-x-auto bg-gradient-to-br from-slate-50/80 via-white to-campus-50/30">
-          <svg
+        <div className="p-[1.5px] bg-gradient-to-br from-[rgba(139,124,255,0.65)] via-[rgba(124,108,255,0.12)] to-[rgba(61,220,151,0.45)]">
+          <div className="overflow-x-auto rounded-[16px] bg-gradient-to-br from-[rgba(124,108,255,0.10)] via-[rgba(30,26,51,0.28)] to-[rgba(93,76,230,0.12)]">
+            <svg
             viewBox={`0 0 1360 ${height}`}
             style={{ minWidth: 1080, width: "100%", height: "auto" }}
             role="img"
             aria-label="校园电脑故障知识图谱"
           >
             <defs>
+              <linearGradient id="node-frame" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stopColor="rgba(139,124,255,0.9)" />
+                <stop offset="55%" stopColor="rgba(124,108,255,0.32)" />
+                <stop offset="100%" stopColor="rgba(61,220,151,0.62)" />
+              </linearGradient>
+              <linearGradient id="node-frame-soft" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="rgba(139,124,255,0.65)" />
+                <stop offset="100%" stopColor="rgba(124,108,255,0.18)" />
+              </linearGradient>
+              <linearGradient id="node-frame-amber" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stopColor="rgba(252,211,77,0.85)" />
+                <stop offset="100%" stopColor="rgba(124,108,255,0.35)" />
+              </linearGradient>
               <filter id="node-shadow" x="-20%" y="-20%" width="140%" height="140%">
-                <feDropShadow dx="0" dy="4" stdDeviation="5" floodColor="#1e458a" floodOpacity="0.12" />
+                <feDropShadow dx="0" dy="4" stdDeviation="5" floodColor="#5b4bd6" floodOpacity="0.28" />
               </filter>
             </defs>
 
@@ -185,65 +198,68 @@ export default function GraphPage() {
             {rows.map((row) => {
               const phenomenon = row.entry.现象关键词[0] ?? "未记录现象";
               const cause = row.entry.可能原因[0] ?? "未记录原因";
+              // 中间节点展示该条知识自己的现象关键词组合与排查信息，避免与左侧故障类型重复
+              const keywordLabel = row.entry.现象关键词.slice(0, 3).join(" / ") || "未记录现象";
+              const entryMeta = `紧急程度 ${row.entry.紧急程度} · ${row.entry.排查步骤.length} 步排查`;
               return (
                 <g key={`${row.entry.故障类型}-${row.index}`}>
                   <path
                     d={`M 570 ${row.y + 44} C 610 ${row.y + 44}, 610 ${row.y + 36}, 646 ${row.y + 36}`}
                     fill="none"
-                    stroke="#38bdf8"
+                    stroke="#7c6cff"
                     strokeWidth="1.5"
                     opacity="0.55"
                   />
                   <path
                     d={`M 570 ${row.y + 44} C 620 ${row.y + 44}, 920 ${row.y + 36}, 1006 ${row.y + 36}`}
                     fill="none"
-                    stroke="#f59e0b"
+                    stroke="#3ddc97"
                     strokeWidth="1.5"
                     opacity="0.45"
                   />
 
-                  <a href={diagnosisHref(`${row.entry.故障类型} ${phenomenon}`)} aria-label={`诊断知识条目 ${row.entry.故障类型}`}>
+                  <a href={diagnosisHref(`${row.entry.故障类型} ${phenomenon}`)} aria-label={`诊断知识条目 ${keywordLabel}`}>
                     <g filter="url(#node-shadow)" className="cursor-pointer">
-                      <rect x="292" y={row.y} width="278" height="88" rx="15" fill="#ffffff" stroke={row.category.color} strokeWidth="1.5" />
+                      <rect x="292" y={row.y} width="278" height="88" rx="15" fill="rgba(255,255,255,0.05)" stroke="url(#node-frame)" strokeWidth="1.6" />
                       <circle cx="314" cy={row.y + 24} r="5" fill={row.category.color} />
                       <GraphText
-                        lines={wrapLines(row.entry.故障类型, 14, 2)}
+                        lines={wrapLines(keywordLabel, 13, 2)}
                         x={330}
                         y={row.y + 26}
-                        className="fill-slate-800 text-[12px] font-bold"
+                        className="fill-[#f2f1fa] text-[12px] font-bold"
                       />
                       <GraphText
-                        lines={wrapLines(phenomenon, 24, 2)}
+                        lines={wrapLines(entryMeta, 24, 1)}
                         x={310}
                         y={row.y + 56}
-                        className="fill-slate-400 text-[10px]"
+                        className="fill-[#a8a3c7] text-[10px]"
                       />
-                      <text x="548" y={row.y + 79} textAnchor="end" className="fill-campus-600 text-[9px] font-semibold">点击诊断 →</text>
+                      <text x="548" y={row.y + 79} textAnchor="end" className="fill-[#a89bff] text-[9px] font-semibold">点击诊断 →</text>
                     </g>
                   </a>
 
                   <a href={diagnosisHref(phenomenon)} aria-label={`诊断现象 ${phenomenon}`}>
                     <g filter="url(#node-shadow)" className="cursor-pointer">
-                      <rect x="646" y={row.y + 3} width="312" height="66" rx="14" fill="#eff8ff" stroke="#92cefd" strokeWidth="1.3" />
-                      <text x="664" y={row.y + 22} className="fill-sky-600 text-[9px] font-bold">现象节点</text>
+                      <rect x="646" y={row.y + 3} width="312" height="66" rx="14" fill="rgba(255,255,255,0.05)" stroke="url(#node-frame-soft)" strokeWidth="1.4" />
+                      <text x="664" y={row.y + 22} className="fill-[#3ddc97] text-[9px] font-bold">现象节点</text>
                       <GraphText
                         lines={wrapLines(phenomenon, 22, 2)}
                         x={664}
                         y={row.y + 41}
-                        className="fill-slate-700 text-[10px] font-medium"
+                        className="fill-[#e2e8f0] text-[10px] font-medium"
                       />
                     </g>
                   </a>
 
                   <a href={diagnosisHref(`${row.entry.故障类型} ${cause}`)} aria-label={`诊断原因 ${cause}`}>
                     <g filter="url(#node-shadow)" className="cursor-pointer">
-                      <rect x="1006" y={row.y + 3} width="300" height="66" rx="14" fill="#fffbeb" stroke="#fcd34d" strokeWidth="1.3" />
-                      <text x="1024" y={row.y + 22} className="fill-amber-600 text-[9px] font-bold">可能原因</text>
+                      <rect x="1006" y={row.y + 3} width="300" height="66" rx="14" fill="rgba(255,255,255,0.05)" stroke="url(#node-frame-amber)" strokeWidth="1.4" />
+                      <text x="1024" y={row.y + 22} className="fill-[#fcd34d] text-[9px] font-bold">可能原因</text>
                       <GraphText
                         lines={wrapLines(cause, 21, 2)}
                         x={1024}
                         y={row.y + 41}
-                        className="fill-slate-700 text-[10px] font-medium"
+                        className="fill-[#e2e8f0] text-[10px] font-medium"
                       />
                     </g>
                   </a>
@@ -254,7 +270,7 @@ export default function GraphPage() {
             {categoryPositions.map((category) => (
               <a key={category.type} href={diagnosisHref(category.type)} aria-label={`诊断故障类型 ${category.type}`}>
                 <g filter="url(#node-shadow)" className="cursor-pointer">
-                  <rect x="48" y={category.y - 29} width="178" height="58" rx="17" fill={category.color} />
+                  <rect x="48" y={category.y - 29} width="178" height="58" rx="17" fill={category.color} stroke="url(#node-frame)" strokeWidth="1.5" />
                   <GraphText
                     lines={wrapLines(category.type, 11, 2)}
                     x={137}
@@ -267,8 +283,10 @@ export default function GraphPage() {
               </a>
             ))}
           </svg>
+          </div>
         </div>
       </section>
-    </div>
+      </div>
+    </RoleGate>
   );
 }

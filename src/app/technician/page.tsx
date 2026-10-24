@@ -1,6 +1,3 @@
-﻿/**
- * 用途：维修员工作台，提供待接单处理、维修记录填写与完成工单入口。
- */
 "use client";
 
 import Link from "next/link";
@@ -9,6 +6,7 @@ import { Icon } from "@/components/icon";
 import { PageHeader } from "@/components/page-header";
 import { PriorityLabel, StatusBadge } from "@/components/status-badge";
 import { StatCard } from "@/components/stat-card";
+import { useAuthorizedFetch, useRequireAuth } from "@/lib/auth-context";
 import { getEvaluationStats, getStoredTickets, updateStoredTicket } from "@/lib/storage";
 import type { RepairAdvice, Ticket } from "@/lib/types";
 
@@ -22,7 +20,8 @@ function formatDate(value: string) {
   });
 }
 
-export default function TechnicianPage() {
+function TechnicianWorkspace() {
+  const authorizedFetch = useAuthorizedFetch();
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [advices, setAdvices] = useState<Record<string, RepairAdvice>>({});
@@ -30,6 +29,9 @@ export default function TechnicianPage() {
   const [adviceError, setAdviceError] = useState("");
   const [loading, setLoading] = useState(true);
   const [savedId, setSavedId] = useState("");
+  const [uploadNote, setUploadNote] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [uploadMessage, setUploadMessage] = useState("");
 
   const refreshTickets = () => {
     const storedTickets = getStoredTickets();
@@ -131,17 +133,67 @@ export default function TechnicianPage() {
     window.setTimeout(() => setSavedId(""), 1600);
   };
 
+  /** 上传后台数据给管理员：工单统计 + 明细 + 备注。 */
+  const uploadReport = async () => {
+    setUploading(true);
+    setUploadMessage("");
+    try {
+      const response = await authorizedFetch("/api/repair-reports", {
+        method: "POST",
+        body: JSON.stringify({
+          scope: "全部工单",
+          note: uploadNote.trim(),
+          stats: {
+            total: tickets.length,
+            pending: pendingTickets.length,
+            repairing: repairingTickets.length,
+            completed: completedCount,
+            completionRate: tickets.length ? Math.round((completedCount / tickets.length) * 100) : 0,
+            averageRating: evaluationStats.average,
+            ratingCount: evaluationStats.count,
+          },
+          tickets: tickets.map((ticket) => ({
+            id: ticket.id,
+            title: ticket.title,
+            status: ticket.status,
+            priority: ticket.priority,
+            dorm: ticket.dorm,
+            repairNote: ticket.repairNote,
+          })),
+        }),
+      });
+      const data = (await response.json().catch(() => ({}))) as { error?: string };
+
+      if (!response.ok) {
+        throw new Error(data.error ?? "上传失败，请稍后重试");
+      }
+
+      setUploadMessage("上传成功，管理员已可在看板查看本次后台数据。");
+      setUploadNote("");
+    } catch (error) {
+      setUploadMessage(error instanceof Error ? error.message : "上传失败，请稍后重试");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
     <div>
       <PageHeader
         eyebrow="TECHNICIAN WORKSPACE"
         title="维修员工作台"
-        description="处理待接单任务、记录维修过程，并将已完成的工单同步给学生。"
+        description="处理待接单任务、记录维修过程，将后台数据上传给管理员，并维护特供资料库。"
         action={
-          <Link href="/tickets" className="secondary-button">
-            <Icon name="clipboard" className="size-4" />
-            查看全部工单
-          </Link>
+          <div className="flex flex-wrap gap-2">
+            <Link href="/technician/library" className="secondary-button px-4 py-2.5">
+              <Icon name="book" className="size-4" />
+              特供资料库
+            </Link>
+            <Link href="/tickets" className="secondary-button px-4 py-2.5">
+              <Icon name="clipboard" className="size-4" />
+              查看全部工单
+            </Link>
+          </div>
         }
       />
 
@@ -382,9 +434,85 @@ export default function TechnicianPage() {
               涉及学生个人数据时，请先征得同意；更换硬件后请记录配件型号和保修信息。
             </p>
           </div>
+
+          {/* 上传后台数据给管理员 */}
+          <section className="surface-card p-5">
+            <div className="flex items-start gap-3">
+              <span className="grid size-9 place-items-center rounded-xl bg-campus-50 text-campus-700">
+                <Icon name="cloud-upload" className="size-4" />
+              </span>
+              <div>
+                <h2 className="font-bold text-slate-900">上传后台数据给管理员</h2>
+                <p className="mt-1 text-xs text-slate-400">
+                  把当前工单统计与维修明细上传到服务端，管理员登录后即可在看板查看。
+                </p>
+              </div>
+            </div>
+
+            <dl className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {[
+                ["工单总数", tickets.length],
+                ["待接单", pendingTickets.length],
+                ["维修中", repairingTickets.length],
+                ["已完成", completedCount],
+              ].map(([label, value]) => (
+                <div key={String(label)} className="rounded-xl bg-slate-50 px-3 py-2.5">
+                  <dt className="text-[10px] text-slate-400">{label}</dt>
+                  <dd className="mt-0.5 text-lg font-bold text-slate-900">{value}</dd>
+                </div>
+              ))}
+            </dl>
+
+            <div className="mt-4">
+              <label htmlFor="upload-note" className="field-label text-xs">
+                备注（可选，最多 500 字）
+              </label>
+              <textarea
+                id="upload-note"
+                rows={2}
+                maxLength={500}
+                value={uploadNote}
+                onChange={(event) => setUploadNote(event.target.value)}
+                className="field-input resize-y text-xs"
+                placeholder="例如：本周散热类工单偏多，建议安排集中清灰。"
+              />
+            </div>
+
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                onClick={() => void uploadReport()}
+                disabled={uploading}
+                className="primary-button py-2.5 disabled:opacity-60"
+              >
+                <Icon name="cloud-upload" className="size-4" />
+                {uploading ? "上传中…" : "上传后台数据"}
+              </button>
+              {uploadMessage ? (
+                <span className="text-xs font-semibold text-campus-700">{uploadMessage}</span>
+              ) : null}
+            </div>
+          </section>
         </section>
       </div>
     </div>
   );
 }
 
+export default function TechnicianPage() {
+  const authorized = useRequireAuth("technician");
+
+  if (!authorized) {
+    return (
+      <div className="surface-card mx-auto max-w-md p-10 text-center">
+        <span className="mx-auto grid size-12 place-items-center rounded-2xl bg-campus-50 text-campus-600">
+          <Icon name="lock" className="size-6" />
+        </span>
+        <p className="mt-4 text-sm font-bold text-slate-700">正在校验维修员登录状态…</p>
+        <p className="mt-1 text-xs text-slate-400">未登录将自动跳转到登录页。</p>
+      </div>
+    );
+  }
+
+  return <TechnicianWorkspace />;
+}

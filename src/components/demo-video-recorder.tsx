@@ -1,6 +1,3 @@
-﻿/**
- * 用途：在浏览器中把诊断结果绘制为动画并用 MediaRecorder 生成可下载的演示视频。
- */
 "use client";
 
 import { useEffect, useRef, useState } from "react";

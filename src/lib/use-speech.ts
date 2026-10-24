@@ -1,6 +1,3 @@
-/**
- * 用途：封装浏览器语音识别与语音播报，供诊断页做语音问诊和结果朗读。
- */
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";

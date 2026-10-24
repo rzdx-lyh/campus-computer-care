@@ -1,6 +1,3 @@
-﻿/**
- * 用途：将工单导出为带 UTF-8 BOM 的 CSV，便于 Excel 直接打开并保留中文。
- */
 import type { Ticket } from "@/lib/types";
 
 export const TICKETS_CSV_BOM = "\uFEFF";

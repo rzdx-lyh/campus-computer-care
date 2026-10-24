@@ -1,6 +1,3 @@
-﻿/**
- * 用途：提供全局角色状态，并将学生/维修员/管理员选择持久化到 LocalStorage。
- */
 "use client";
 
 import {

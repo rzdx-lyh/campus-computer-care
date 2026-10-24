@@ -1,6 +1,3 @@
-﻿/**
- * 用途：封装工单的 LocalStorage 读写、初始化和状态流转工具。
- */
 import { DEMO_TICKETS } from "@/lib/mock-data";
 import type { Ticket, TicketStatus } from "@/lib/types";
 

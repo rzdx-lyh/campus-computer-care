@@ -1,6 +1,3 @@
-/**
- * 用途：为维修员工单生成 AI 维修建议（原因 / 备件 / 工时 / 验收步骤），失败时给本地兜底。
- */
 import OpenAI from "openai";
 import type { NextRequest } from "next/server";
 import type { RepairAdvice } from "@/lib/types";

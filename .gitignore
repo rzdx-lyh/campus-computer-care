@@ -9,3 +9,10 @@ npm-debug.log*
 .vercel
 coverage
 
+# 本地运行时数据：向量库索引、维修员上传记录、鉴权密钥（重启自动重建种子数据）
+/data
+
+
+node_modules.bak
+.logs
+*.zip

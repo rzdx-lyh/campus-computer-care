@@ -1,7 +1,9 @@
-﻿/**
- * 用途：提供轻量级本地 RAG 向量库，使用字符 n-gram 哈希向量和余弦相似度检索知识块。
- */
 import rawKnowledgeBase from "../../knowledge-base/data/knowledge_base.json";
+import {
+  cosineSimilarity,
+  embedText,
+  splitIntoChunks,
+} from "./vector-core";
 
 interface KnowledgeEntry {
   故障类型: string;
@@ -34,105 +36,9 @@ interface StoredChunk {
   vector: Float32Array;
 }
 
-const VECTOR_DIMENSION = 384;
 const KNOWLEDGE_BASE = rawKnowledgeBase as KnowledgeEntry[];
 
-function normalizeText(value: string): string {
-  return value
-    .toLowerCase()
-    .replace(/[^\p{L}\p{N}]+/gu, '')
-    .slice(0, 5000);
-}
-
-function hashFeature(value: string): number {
-  let hash = 2166136261;
-  for (let index = 0; index < value.length; index += 1) {
-    hash ^= value.charCodeAt(index);
-    hash = Math.imul(hash, 16777619);
-  }
-  return hash >>> 0;
-}
-
-export function embedText(text: string): Float32Array {
-  const normalized = normalizeText(text);
-  const vector = new Float32Array(VECTOR_DIMENSION);
-  if (!normalized) return vector;
-
-  const frequencies = new Map<string, number>();
-  for (let index = 0; index < normalized.length; index += 1) {
-    const unigram = normalized[index];
-    frequencies.set(unigram, (frequencies.get(unigram) ?? 0) + 1);
-
-    if (index < normalized.length - 1) {
-      const bigram = normalized.slice(index, index + 2);
-      frequencies.set(bigram, (frequencies.get(bigram) ?? 0) + 1.35);
-    }
-
-    if (index < normalized.length - 2) {
-      const trigram = normalized.slice(index, index + 3);
-      frequencies.set(trigram, (frequencies.get(trigram) ?? 0) + 0.8);
-    }
-  }
-
-  for (const [feature, frequency] of frequencies) {
-    const index = hashFeature(feature) % VECTOR_DIMENSION;
-    const sign = (hashFeature(`sign:${feature}`) & 1) === 0 ? 1 : -1;
-    vector[index] += sign * (1 + Math.log(frequency));
-  }
-
-  let magnitude = 0;
-  for (const value of vector) magnitude += value * value;
-  magnitude = Math.sqrt(magnitude);
-  if (magnitude > 0) {
-    for (let index = 0; index < vector.length; index += 1) {
-      vector[index] /= magnitude;
-    }
-  }
-
-  return vector;
-}
-
-function cosineSimilarity(left: Float32Array, right: Float32Array): number {
-  let score = 0;
-  const length = Math.min(left.length, right.length);
-  for (let index = 0; index < length; index += 1) {
-    score += left[index] * right[index];
-  }
-  return score;
-}
-
-function splitIntoChunks(text: string, maxLength = 700, overlap = 100): string[] {
-  const paragraphs = text
-    .replace(/\r\n?/g, '\n')
-    .split(/\n{2,}|(?<=[。！？!?])\s*/)
-    .map((item) => item.trim())
-    .filter(Boolean);
-
-  const chunks: string[] = [];
-  let current = '';
-
-  for (const paragraph of paragraphs) {
-    if (current.length + paragraph.length <= maxLength) {
-      current += `${current ? '\n' : ''}${paragraph}`;
-      continue;
-    }
-
-    if (current) chunks.push(current);
-    if (paragraph.length <= maxLength) {
-      current = paragraph;
-      continue;
-    }
-
-    for (let start = 0; start < paragraph.length; start += maxLength - overlap) {
-      chunks.push(paragraph.slice(start, start + maxLength));
-    }
-    current = '';
-  }
-
-  if (current) chunks.push(current);
-  return chunks.length > 0 ? chunks : [text.slice(0, maxLength)];
-}
-
+/** 进程内轻量 RAG 向量索引：服务重启后重建，Embedding 逻辑见 vector-core。 */
 export class RagVectorStore {
   private chunks: StoredChunk[] = [];
   private documentIds = new Set<string>();
@@ -187,7 +93,7 @@ function buildKnowledgeDocuments(): RagDocument[] {
   return KNOWLEDGE_BASE.map((entry, index) => ({
     id: `knowledge-${index + 1}`,
     title: `${entry.故障类型}｜${entry.现象关键词.slice(0, 3).join('、')}`,
-    sourceType: 'knowledge_base',
+    sourceType: 'knowledge_base' as const,
     content: [
       `故障类型：${entry.故障类型}`,
       `现象关键词：${entry.现象关键词.join('、')}`,

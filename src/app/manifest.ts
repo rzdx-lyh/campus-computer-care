@@ -1,6 +1,3 @@
-﻿/**
- * 用途：声明校园电脑管家 PWA 元数据、主题色和安装图标。
- */
 import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {

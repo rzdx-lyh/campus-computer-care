@@ -1,6 +1,3 @@
-/**
- * 用途：工单提交页，提供设备、宿舍、故障描述、照片与预约时段录入骨架。
- */
 "use client";
 
 import Link from "next/link";
@@ -8,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import { Icon } from "@/components/icon";
 import { PageHeader } from "@/components/page-header";
+import { CampusMap } from "@/components/campus-map";
 import { clearDiagnosisTicketDraft, readDiagnosisTicketDraft } from "@/lib/diagnosis-draft";
 import { addStoredTicket, createTicketId } from "@/lib/storage";
 import type { TicketPriority } from "@/lib/types";
@@ -318,6 +316,8 @@ export default function NewTicketPage() {
         </div>
 
         <aside className="space-y-5">
+          <CampusMap dorm={form.dorm} />
+
           <div className="surface-card top-40 p-5 lg:sticky">
             <h2 className="text-sm font-bold text-slate-900">提交前确认</h2>
             <ul className="mt-4 space-y-3">

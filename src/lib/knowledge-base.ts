@@ -1,6 +1,3 @@
-﻿/**
- * 用途：加载并检索校园电脑故障知识库，为 AI 诊断提供带置信度的本地 RAG 上下文。
- */
 import rawKnowledgeBase from "../../knowledge-base/data/knowledge_base.json";
 
 export interface KnowledgeEntry {

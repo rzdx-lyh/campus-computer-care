@@ -1,6 +1,3 @@
-﻿/**
- * 用途：仅在生产环境注册 Service Worker，避免开发环境干扰热更新。
- */
 "use client";
 
 import { useEffect } from "react";

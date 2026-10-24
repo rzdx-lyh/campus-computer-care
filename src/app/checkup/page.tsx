@@ -1,6 +1,3 @@
-﻿/**
- * 用途：电脑体检页，读取浏览器公开的设备能力并展示为响应式信息表格。
- */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -67,9 +64,11 @@ export default function CheckupPage() {
   const [metrics, setMetrics] = useState<DeviceMetric[]>(INITIAL_METRICS);
   const [scanning, setScanning] = useState(true);
   const [lastScan, setLastScan] = useState("尚未完成检测");
+  const [score, setScore] = useState<number | null>(null);
 
   const collectDeviceInfo = async () => {
     setScanning(true);
+    setScore(null);
     setMetrics(INITIAL_METRICS.map((metric) => ({ ...metric })));
 
     const nav = navigator as NavigatorWithDeviceInfo;
@@ -108,6 +107,9 @@ export default function CheckupPage() {
       supported: Boolean(connection),
     });
 
+    let batteryLevel: number | null = null;
+    let charging = false;
+    let batterySupported = false;
     let batteryMetric: DeviceMetric = {
       id: "battery",
       label: "电池状态",
@@ -119,6 +121,9 @@ export default function CheckupPage() {
     if (nav.getBattery) {
       try {
         const battery = await nav.getBattery();
+        batterySupported = true;
+        batteryLevel = battery.level;
+        charging = battery.charging;
         batteryMetric = {
           id: "battery",
           label: "电池状态",
@@ -135,6 +140,23 @@ export default function CheckupPage() {
     setMetrics(nextMetrics);
     setLastScan(new Date().toLocaleString("zh-CN", { hour12: false }));
     setScanning(false);
+
+    const netType = nav.connection?.effectiveType;
+    let health = 100;
+    if (!navigator.onLine) health -= 20;
+    if (netType === "slow-2g" || netType === "2g") health -= 20;
+    else if (netType === "3g") health -= 8;
+    if (typeof nav.hardwareConcurrency === "number") {
+      if (nav.hardwareConcurrency < 4) health -= 12;
+      else if (nav.hardwareConcurrency < 8) health -= 5;
+    }
+    if (typeof nav.deviceMemory === "number") {
+      if (nav.deviceMemory < 4) health -= 12;
+      else if (nav.deviceMemory < 8) health -= 5;
+    }
+    if (batterySupported && batteryLevel !== null && !charging && batteryLevel < 0.2) health -= 15;
+    else if (batterySupported && batteryLevel !== null && !charging && batteryLevel < 0.4) health -= 8;
+    setScore(Math.max(0, Math.min(100, Math.round(health))));
   };
 
   useEffect(() => {
@@ -144,6 +166,12 @@ export default function CheckupPage() {
   }, []);
 
   const supportedCount = metrics.filter((metric) => metric.supported).length;
+
+  const RING_C = 2 * Math.PI * 60;
+  const scoreColor =
+    score === null ? "#64748B" : score >= 80 ? "#7C6CFF" : score >= 60 ? "#8B7CFF" : "#F59E0B";
+  const scoreLabel =
+    score === null ? "检测中" : score >= 80 ? "状态优秀" : score >= 60 ? "运行良好" : "建议关注";
 
   return (
     <div>
@@ -236,9 +264,48 @@ export default function CheckupPage() {
         </section>
 
         <aside className="space-y-5">
+          <div className="surface-card flex flex-col items-center p-6">
+            <span className="self-start text-xs font-semibold text-slate-400">综合健康分</span>
+            <div className="my-3">
+              <svg width="150" height="150" viewBox="0 0 150 150">
+                <circle cx="75" cy="75" r="60" stroke="rgba(148,163,184,0.18)" strokeWidth="12" fill="none" />
+                <circle
+                  cx="75"
+                  cy="75"
+                  r="60"
+                  stroke={scoreColor}
+                  strokeWidth="12"
+                  fill="none"
+                  strokeLinecap="round"
+                  strokeDasharray={RING_C}
+                  style={{
+                    strokeDashoffset: score === null ? RING_C : RING_C * (1 - score / 100),
+                    transition: "stroke-dashoffset 1s ease",
+                  }}
+                  transform="rotate(-90 75 75)"
+                />
+                <text x="75" y="71" textAnchor="middle" fontSize="38" fontWeight="700" fill="#F1F5F9">
+                  {score === null ? "--" : score}
+                </text>
+                <text x="75" y="96" textAnchor="middle" fontSize="13" fill="#9CA9BA">
+                  {scoreLabel}
+                </text>
+              </svg>
+            </div>
+            <p className="text-center text-xs leading-5 text-slate-500">
+              依据在线、电量、网络、CPU 与内存实时估算
+            </p>
+            <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-slate-100">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-[#8b7cff] to-[#5b6cff] transition-all duration-700"
+                style={{ width: `${score === null ? 0 : score}%` }}
+              />
+            </div>
+          </div>
+
           <div className="surface-card p-6">
             <div className="flex items-center justify-between">
-              <span className="grid size-11 place-items-center rounded-xl bg-campus-600 text-white shadow-lg shadow-campus-200">
+              <span className="grid size-11 place-items-center rounded-xl bg-[rgba(124,108,255,0.18)] text-[#93c5fd] shadow-[0_6px_16px_-10px_rgba(124,108,255,0.6)]">
                 <Icon name="activity" className="size-5" />
               </span>
               <span className="text-xs font-semibold text-slate-400">检测完成度</span>
@@ -249,7 +316,7 @@ export default function CheckupPage() {
             <p className="mt-1 text-sm text-slate-500">项信息可被当前浏览器读取</p>
             <div className="mt-5 h-2 overflow-hidden rounded-full bg-slate-100">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-campus-500 to-sky-400 transition-all duration-700"
+                className="h-full rounded-full bg-gradient-to-r from-[#8b7cff] to-[#5b6cff] transition-all duration-700"
                 style={{ width: `${scanning ? 8 : (supportedCount / 4) * 100}%` }}
               />
             </div>

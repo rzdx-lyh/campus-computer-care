@@ -1,6 +1,3 @@
-﻿/**
- * 用途：统一定义角色、工单、设备信息、RAG 来源与多轮 AI 诊断的数据结构。
- */
 export type UserRole = "student" | "technician" | "admin";
 
 export type TicketStatus = "pending" | "repairing" | "completed";

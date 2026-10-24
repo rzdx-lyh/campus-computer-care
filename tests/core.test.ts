@@ -10,6 +10,7 @@ import { buildTicketsCsv, TICKETS_CSV_BOM } from "../src/lib/csv-export";
 import { buildDiagnosisReport } from "../src/lib/report-export";
 import { createDiagnosisTicketDraft } from "../src/lib/diagnosis-draft";
 import { RagVectorStore } from "../src/lib/rag-vector-store";
+import { matchBuilding, recommendTechnician, estimateEta } from "../src/lib/campus";
 import type { DiagnosisResult, Ticket } from "../src/lib/types";
 
 const baseDiagnosis: DiagnosisResult = {
@@ -131,5 +132,28 @@ test("知识库配置：25 条且六元组字段完整", () => {
     assert.ok(Array.isArray(entry.排查步骤));
     assert.equal(typeof entry.紧急程度, "string");
   }
+});
+
+test("校园派单：宿舍楼号识别与就近推荐", () => {
+  const building = matchBuilding("紫荆 3 号楼 402");
+  assert.equal(building?.id, "zj3");
+  assert.equal(matchBuilding(""), null);
+  assert.equal(matchBuilding("图书馆二楼"), null);
+
+  const dispatch = recommendTechnician("紫荆 3 号楼");
+  assert.ok(dispatch);
+  // 紫荆 3 号楼驻点空闲维修员为王浩
+  assert.equal(dispatch?.technician.id, "tech-wang");
+  assert.equal(dispatch?.station.id, "zj3");
+  assert.equal(dispatch?.studentBuilding.id, "zj3");
+
+  // 无法识别楼宇时不推荐
+  assert.equal(recommendTechnician("火星宿舍"), null);
+});
+
+test("校园派单：到校时长估算输出格式", () => {
+  const eta = estimateEta(0);
+  assert.match(eta, /约 \d+ 分钟/);
+  assert.ok(estimateEta(1000).length > 0);
 });
 
