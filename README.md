@@ -213,7 +213,7 @@ node --check public/sw.js
 
 - GitHub 公开仓库：https://github.com/rzdx-lyh/campus-computer-care
 - Release v1.0.0：https://github.com/rzdx-lyh/campus-computer-care/releases/tag/v1.0.0
-- 技术文档 PDF：`docs/技术文档.pdf`（22 页）
+- 技术文档 PDF：`docs/技术文档.pdf`（24 页）
 - 演示视频脚本 / 答辩 Q&A：`docs/`
 
 提交前执行 Key 自查：
@@ -227,6 +227,7 @@ git grep -n -E "s[k]-[A-Za-z0-9_-]{20,}"
 ## License
 
 本项目代码采用 MIT License，见根目录 `LICENSE`。`knowledge-base/` 目录保留其原有 MIT License。
+
 
 
 
