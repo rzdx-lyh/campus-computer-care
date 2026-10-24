@@ -121,13 +121,10 @@ chat/
 ├── tests/core.test.ts
 ├── .github/workflows/ci.yml
 ├── docs/
-│   ├── 程序设计.md
 │   ├── 技术文档.md
+│   ├── 技术文档.pdf
 │   ├── 演示视频脚本.md
-│   ├── 答辩Q&A.md
-│   ├── 提交清单.md
-│   ├── 33-部署与演示说明.md
-│   └── 进度.md
+│   └── 答辩Q&A.md
 ├── .env.example
 ├── package.json
 └── README.md
@@ -200,7 +197,7 @@ node --check public/sw.js
 
 ## 在线演示
 
-在线演示地址与临时隧道请查看 `docs/33-部署与演示说明.md`。README 不写死可能失效的隧道地址。
+在线演示可使用项目根目录的 `启动校园电脑管家.bat` 本地启动；README 不写死临时隧道地址。
 
 ## 已知限制
 
@@ -217,8 +214,7 @@ node --check public/sw.js
 - GitHub 公开仓库：https://github.com/rzdx-lyh/campus-computer-care
 - Release v1.0.0：https://github.com/rzdx-lyh/campus-computer-care/releases/tag/v1.0.0
 - 技术文档 PDF：`docs/技术文档.pdf`（20 页）
-- 设计说明书：`docs/程序设计.md`
-- 演示视频脚本 / 答辩 Q&A / 提交清单：`docs/`
+- 演示视频脚本 / 答辩 Q&A：`docs/`
 
 提交前执行 Key 自查：
 
