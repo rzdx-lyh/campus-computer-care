@@ -1,4 +1,4 @@
-﻿<!-- 用途：校园电脑管家赛事版项目说明、架构、运行测试、评分点与提交信息。 -->
+<!-- 用途：校园电脑管家赛事版项目说明、架构、运行测试、评分点与提交信息。 -->
 # 校园电脑管家
 
 > 面向高校宿舍场景的学生电脑 AI 诊断、知识检索与维修协同平台。
@@ -219,6 +219,7 @@ node --check public/sw.js
 - GitHub 公开仓库：https://github.com/rzdx-lyh/campus-computer-care
 - Release v1.0.0：https://github.com/rzdx-lyh/campus-computer-care/releases/tag/v1.0.0
 - 技术文档 PDF：`docs/技术文档.pdf`（20 页，v2.0）
+- 作品介绍文档 PDF：`docs/作品介绍文档.pdf`（9 页）
 - 路演 PPT：`交付材料/校园电脑管家-WAB路演PPT.pptx`（14 页）
 - 演示视频脚本 / 答辩 Q&A：`docs/`
 
