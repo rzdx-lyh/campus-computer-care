@@ -5,11 +5,11 @@
 
 ## 赛事信息
 
-- 赛事：技筑视界·码绘交互——Web 前端开发创意技能大赛
+- 赛事：第九届传智杯全国大学生数智创新与 AI 应用大赛 · AI WEB 网页开发挑战赛（团队赛）
 - 作品名称：校园电脑管家
-- 提交截止：2026-10-25 23:59
-- 现场答辩：2026-10-28 19:30–22:00
-- 团队信息：`信息工程学院 / 游手好闲队 / 队长：李永浩 / 成员：许智宽、刘育贤`
+- 报名与作品提交截止：2026-11-18
+- 省赛时间：2026-11-22
+- 团队信息：`信息工程学院 / WAB（Web Aid Buddy） / 队长：李永浩 / 成员：许智宽、刘育贤`
 
 ## 一句话定位
 
@@ -40,9 +40,11 @@
 - 数字人「小管家」：SVG 吉祥物跟随 AI 诊断进度变化表情（待命 / 分析中 / 已定位 / 建议报修），气泡显示 AI 结论摘要，可一键朗读 AI 回答，支持点击互动。
 - 校园就近派单：提交工单时按宿舍楼宇在 SVG 校园地图上自动推荐最近空闲维修员，并给出预计到场时长。
 
-## 评分点对照
+## 能力自评对照
 
-| 评分维度 | 权重 | 本项目做了什么 | 主要代码位置 |
+> 说明：下表为便于评审快速定位功能的代码索引，权重为团队自评参考，非传智杯官方评分标准。
+
+| 能力维度 | 自评权重 | 本项目做了什么 | 主要代码位置 |
 | --- | ---: | --- | --- |
 | AI 技术深度 | 35% | DeepSeek 多轮问诊、角色 Prompt、JSON 结构化输出、本地 RAG、可选 Search + Fetch、失败降级 | `src/app/api/diagnose/route.ts`、`src/lib/knowledge-base.ts`、`src/lib/rag-vector-store.ts`、`src/lib/deepseek-search.ts` |
 | 创新性 | 25% | 从诊断直接生成工单、学习模式步骤卡、错误码上下文、证据链、AI 维修摘要、管理洞察、账号鉴权、本地向量资料库 | `src/app/diagnosis/page.tsx`、`src/lib/error-code.ts`、`src/app/api/repair-advice/route.ts`、`src/app/api/insight/route.ts`、`src/lib/local-vector-db.ts`、`src/lib/auth-store.ts` |
@@ -81,7 +83,7 @@ flowchart LR
 ## 目录结构
 
 ```text
-chat/
+校园电脑管家-最终工程/
 ├── src/
 │   ├── app/
 │   │   ├── page.tsx
@@ -138,7 +140,7 @@ chat/
 | --- | --- | --- | --- |
 | `DEEPSEEK_API_KEY` | 是 | 无 | 服务端 DeepSeek API Key，不得提交到仓库 |
 | `DEEPSEEK_BASE_URL` | 否 | `https://api.deepseek.com` | OpenAI 兼容 API 地址 |
-| `DEEPSEEK_MODEL` | 否 | `deepseek-flash` | 维修建议和管理洞察使用；诊断接口使用 `deepseek-flash` |
+| `DEEPSEEK_MODEL` | 否 | `deepseek-flash` | 三条 AI 链路（诊断、维修建议、管理洞察）共用，诊断接口同样读取该变量 |
 | `DEEPSEEK_WEB_SEARCH` | 否 | `false` | 设为 `true` 开启 Search + Fetch 联网检索 |
 | `AUTH_SECRET` | 否 | 自动生成并持久化到 `data/.auth-secret` | 登录令牌 HMAC 密钥；配置后重启不影响会话 |
 | `AUTH_ADMIN_USERNAME` / `AUTH_ADMIN_PASSWORD` | 否 | `admin` / `admin123` | 管理员演示账号 |
@@ -195,9 +197,12 @@ node --check public/sw.js
 3. DevTools Network 切换 Offline
 4. 刷新 `/graph`，页面应继续可用
 
-## 在线演示
+## 在线演示（传智杯可选加分项）
 
-在线演示可使用项目根目录的 `启动校园电脑管家.bat` 本地启动；README 不写死临时隧道地址。
+传智杯 AI WEB 赛道将「在线演示」列为可选加分项。本项目提供两种演示方式：
+
+- 本地演示：双击根目录 `启动校园电脑管家.bat`，或执行 `npm run dev` 后访问 `http://localhost:3000`。
+- 公网在线演示（加分）：可将本仓库部署到 Vercel / 云服务器，部署后将可访问地址填入赛氪提交表单。部署时需在托管平台配置 `DEEPSEEK_API_KEY` 等环境变量，切勿把密钥写进仓库。README 不写死临时隧道地址。
 
 ## 已知限制
 
@@ -207,13 +212,14 @@ node --check public/sw.js
 - RAG 向量库为进程内轻量索引，服务重启后重建；维修员特供资料库为本地持久化向量库（`data/vector-db.json`，已 gitignore，删除后自动用种子数据重建）。
 - 视频课件为内置 SVG 动画演示，离线可播放；放入 `public/videos` 真实视频后可在资料中配置 `videoSrc` 切换。
 - 语音、视频生成依赖浏览器能力，Chrome/Edge 支持最佳。
-- 生成视频为 WebM，赛事提交仍需单独录制 5–8 分钟 MP4。
+- 页面内录制的视频为 WebM；赛事提交的 5–8 分钟 MP4 演示视频已完成，见 `交付材料/校园电脑管家-演示视频-1080p.mp4`（5 分 01 秒）。
 
 ## 仓库与发布
 
 - GitHub 公开仓库：https://github.com/rzdx-lyh/campus-computer-care
 - Release v1.0.0：https://github.com/rzdx-lyh/campus-computer-care/releases/tag/v1.0.0
-- 技术文档 PDF：`docs/技术文档.pdf`（24 页）
+- 技术文档 PDF：`docs/技术文档.pdf`（20 页，v2.0）
+- 路演 PPT：`交付材料/校园电脑管家-WAB路演PPT.pptx`（14 页）
 - 演示视频脚本 / 答辩 Q&A：`docs/`
 
 提交前执行 Key 自查：
